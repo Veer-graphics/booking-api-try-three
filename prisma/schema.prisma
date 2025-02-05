@@ -12,7 +12,7 @@ model User {
   username       String    @unique
   password       String
   name           String
-  email          String
+  email          String    @unique
   phoneNumber    String
   profilePicture String
   bookings       Booking[]
@@ -29,8 +29,8 @@ model Booking {
   totalPrice     Int
   bookingStatus  String
   hostId         String
-  user           User     @relation(fields: [userId], references: [id])
-  property       Property @relation(fields: [propertyId], references: [id])
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   host           Host     @relation(fields: [hostId], references: [id], onDelete: Cascade)
 }
 
@@ -40,8 +40,8 @@ model Review {
   propertyId String
   rating     Int
   comment    String
-  user       User     @relation(fields: [userId], references: [id])
-  property   Property @relation(fields: [propertyId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Property {

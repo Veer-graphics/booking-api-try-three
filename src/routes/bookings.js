@@ -22,60 +22,84 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
+
+        if (!id || typeof id !== "string" || id.trim() === "") {
+            return res.status(400).json({ message: "Invalid booking ID." });
+        }
+
         const booking = await getBookingById(id);
 
         if (!booking) {
-            res.status(404).json({ message: `Booking with id ${id} not found` });
-        } else {
-            res.json(booking);
+            return res.status(404).json({ message: `Booking with ID ${id} not found.` });
         }
+
+        res.status(200).json(booking);
     } catch (error) {
         next(error);
     }
 });
+
 
 // Create a new booking
 router.post('/', auth, async (req, res, next) => {
     try {
         const bookingData = req.body;
+
+        if (!bookingData || Object.keys(bookingData).length === 0) {
+            return res.status(400).json({ message: "Booking data is required." });
+        }
+
         const newBooking = await createBooking(bookingData);
         res.status(201).json(newBooking);
     } catch (error) {
-        next(error);
+        res.status(500).json({ message: error.message });
     }
 });
+
 
 // Update a booking by ID
 router.put('/:id', auth, async (req, res, next) => {
     try {
         const { id } = req.params;
         const bookingData = req.body;
+
+        if (!id || typeof id !== "string" || id.trim() === "") {
+            return res.status(400).json({ message: "Invalid booking ID." });
+        }
+
         const updatedBooking = await updateBooking(id, bookingData);
 
         if (!updatedBooking) {
-            res.status(404).json({ message: `Booking with id ${id} not found` });
-        } else {
-            res.json(updatedBooking);
+            return res.status(404).json({ message: `Booking with ID ${id} not found.` });
         }
+
+        res.status(200).json(updatedBooking);
     } catch (error) {
-        next(error);
+        res.status(500).json({ message: error.message });
     }
 });
+
 
 // Delete a booking by ID
 router.delete('/:id', auth, async (req, res, next) => {
     try {
         const { id } = req.params;
+
+        if (!id || typeof id !== "string" || id.trim() === "") {
+            return res.status(400).json({ message: "Invalid booking ID." });
+        }
+
         const deletedBooking = await deleteBooking(id);
 
         if (!deletedBooking) {
-            res.status(404).json({ message: `Booking with id ${id} not found` });
-        } else {
-            res.status(200).json(deletedBooking);
+            return res.status(404).json({ message: `Booking with ID ${id} not found.` });
         }
+
+        res.status(200).json({ message: `Booking with ID ${id} deleted successfully.` });
     } catch (error) {
-        next(error);
+        res.status(500).json({ message: error.message });
     }
 });
+
 
 export default router;

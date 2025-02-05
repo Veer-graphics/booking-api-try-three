@@ -1,19 +1,32 @@
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 const deleteUser = async (id) => {
-    const prisma = new PrismaClient();
+    try {
+        // Check if user exists before deletion
+        const user = await prisma.user.findUnique({
+            where: { id },
+        });
 
-    // Step 1: Delete dependent records (e.g., bookings, posts, etc.)
-    await prisma.booking.deleteMany({
-        where: { userId: id }, // Assuming there's a booking table with a userId foreign key
-    });
+        if (!user) return null;
 
-    // Step 2: Delete the user
-    const deletedUser = await prisma.user.delete({
-        where: { id }
-    });
+        // Delete dependent records safely
+        await prisma.booking.deleteMany({ where: { userId: id } });
+        await prisma.review.deleteMany({ where: { userId: id } });
 
-    return deletedUser ? id : null;
-}
+        // Finally, delete the user
+        const deletedUser = await prisma.user.delete({
+            where: { id },
+        });
+
+        return deletedUser ? id : null;
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        return null;
+    } finally {
+        await prisma.$disconnect();
+    }
+};
 
 export default deleteUser;

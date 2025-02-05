@@ -17,15 +17,22 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-router.post('/', auth, async (req, res, next) => {
+router.post('/', async (req, res) => {
     try {
         const { name } = req.body;
-        const newAmenity = await createAmenity(name);
-        res.status(201).json(newAmenity);
+        const result = await createAmenity(name);
+
+        if (result.error) {
+            return res.status(409).json({ error: result.error });  // Conflict status if amenity already exists
+        }
+
+        res.status(201).json(result);  // Successfully created amenity
     } catch (error) {
-        next(error);
+        console.error("Error in route:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
+
 
 router.get('/:id', async (req, res, next) => {
     try {
